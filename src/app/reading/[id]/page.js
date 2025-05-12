@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, use } from "react";
+import { useState, useRef, useEffect } from "react";
 import { 
   ArrowLeft, Bookmark, Volume2, ExternalLink, 
   MessageCircle, ThumbsUp, Settings, 
@@ -9,40 +9,61 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
-// 示例数据 (实际应用中应从数据库或API获取)
+// 英文原文和中文翻译示例（实际项目中应从API获取）
 const readingData = {
   "1": {
-    title: "旅行者的早晨",
-    level: "初级",
-    category: "旅行",
+    title: "A Traveler's Morning",
+    level: "Beginner",
+    category: "Travel",
     author: "Sarah Chen",
     publishDate: "2023-10-15",
     coverImage: "https://images.unsplash.com/photo-1501785888041-af3ef285b470?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80",
     content: `
-      <p class="mb-4">每天早晨，当太阳刚刚升起时，我喜欢在酒店附近散步。<span class="bg-yellow-100 dark:bg-yellow-900 px-1 rounded cursor-pointer" title="sunrise: 日出，黎明">日出</span>的光线很柔和，城市也很安静。</p>
+      <p class="mb-4">Every morning, when the sun has just risen, I like to walk around the hotel. The <span class="bg-yellow-100 dark:bg-yellow-900 px-1 rounded cursor-pointer" title="sunrise: 日出，黎明">sunrise</span> light is soft, and the city is quiet.</p>
       
-      <p class="mb-4">昨天，我在一家小咖啡店停下来。店主用当地语言和我<span class="bg-yellow-100 dark:bg-yellow-900 px-1 rounded cursor-pointer" title="greet: 问候，打招呼">打招呼</span>："早上好！"</p>
+      <p class="mb-4">Yesterday, I stopped at a small coffee shop. The owner <span class="bg-yellow-100 dark:bg-yellow-900 px-1 rounded cursor-pointer" title="greet: 问候，打招呼">greeted</span> me in the local language: "Good morning!"</p>
       
-      <p class="mb-4">我用刚学会的几句话回答："早上好！我想要一杯咖啡，谢谢。"</p>
+      <p class="mb-4">I replied with the few phrases I had learned: "Good morning! I would like a coffee, please."</p>
       
-      <p class="mb-4">店主微笑着说："你的发音很好！你是<span class="bg-yellow-100 dark:bg-yellow-900 px-1 rounded cursor-pointer" title="tourist: 游客，旅行者">游客</span>吗？"</p>
+      <p class="mb-4">The owner smiled and said: "Your pronunciation is good! Are you a <span class="bg-yellow-100 dark:bg-yellow-900 px-1 rounded cursor-pointer" title="tourist: 游客，旅行者">tourist</span>?"</p>
       
-      <p class="mb-4">"是的，"我回答，"我来自美国，这是我第一次来这里。"</p>
+      <p class="mb-4">"Yes," I answered, "I'm from America, and this is my first time here."</p>
       
-      <p class="mb-4">咖啡店里有几位当地人。他们都很友好，一位老先生告诉我关于这座城市的历史。</p>
+      <p class="mb-4">There were a few locals in the coffee shop. They were all very friendly, and an old gentleman told me about the history of the city.</p>
       
-      <p class="mb-4">我喝完咖啡后，继续我的晨间<span class="bg-yellow-100 dark:bg-yellow-900 px-1 rounded cursor-pointer" title="walk: 步行，散步">散步</span>。我看到市场开始热闹起来，商贩们准备新鲜的水果、蔬菜和面包。</p>
+      <p class="mb-4">After I finished my coffee, I continued my morning <span class="bg-yellow-100 dark:bg-yellow-900 px-1 rounded cursor-pointer" title="walk: 步行，散步">walk</span>. I saw the market beginning to come alive, with vendors preparing fresh fruits, vegetables, and bread.</p>
       
-      <p class="mb-4">旅行时，早晨是最好的时间。你可以看到城市醒来的样子，感受当地人的日常生活。这比参观<span class="bg-yellow-100 dark:bg-yellow-900 px-1 rounded cursor-pointer" title="tourist attractions: 旅游景点">旅游景点</span>更有意义。</p>
+      <p class="mb-4">When traveling, mornings are the best time. You can see how the city wakes up and experience the daily life of locals. This is more meaningful than visiting <span class="bg-yellow-100 dark:bg-yellow-900 px-1 rounded cursor-pointer" title="tourist attractions: 旅游景点">tourist attractions</span>.</p>
     `
   }
 };
 
+// 中文翻译数据
+const chineseTranslation = {
+  title: "旅行者的早晨",
+  content: [
+    "每天早晨，当太阳刚刚升起时，我喜欢在酒店附近散步。<span class=\"bg-blue-100 dark:bg-blue-900 px-1 rounded\">日出</span>的光线很柔和，城市也很安静。",
+    "昨天，我在一家小咖啡店停下来。店主用当地语言和我<span class=\"bg-blue-100 dark:bg-blue-900 px-1 rounded\">打招呼</span>：\"早上好！\"",
+    "我用刚学会的几句话回答：\"早上好！我想要一杯咖啡，谢谢。\"",
+    "店主微笑着说：\"你的发音很好！你是<span class=\"bg-blue-100 dark:bg-blue-900 px-1 rounded\">游客</span>吗？\"",
+    "\"是的，\"我回答，\"我来自美国，这是我第一次来这里。\"",
+    "咖啡店里有几位当地人。他们都很友好，一位老先生告诉我关于这座城市的历史。",
+    "我喝完咖啡后，继续我的晨间<span class=\"bg-blue-100 dark:bg-blue-900 px-1 rounded\">散步</span>。我看到市场开始热闹起来，商贩们准备新鲜的水果、蔬菜和面包。",
+    "旅行时，早晨是最好的时间。你可以看到城市醒来的样子，感受当地人的日常生活。这比参观<span class=\"bg-blue-100 dark:bg-blue-900 px-1 rounded\">旅游景点</span>更有意义。"
+  ]
+};
+
 export default function ReadingDetail({ params }) {
-  // 使用 React.use() 解包 params
-  const unwrappedParams = use(params);
-  const { id } = unwrappedParams;
-  const reading = readingData[id];
+  // 兼容 Next.js 新旧 params 处理方式
+  let id = "1";
+  if (typeof params?.then === "function") {
+    const resolvedParams = require("react").use(params);
+    id = resolvedParams?.id || "1";
+  } else {
+    id = params?.id || "1";
+  }
+  const reading = readingData[id] || readingData["1"];
+
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentWord, setCurrentWord] = useState(null);
   const [wordPosition, setWordPosition] = useState({ x: 0, y: 0 });
@@ -52,16 +73,24 @@ export default function ReadingDetail({ params }) {
   const [showTranslation, setShowTranslation] = useState(false);
   const [highlightedWords, setHighlightedWords] = useState([]);
   const [readingProgress, setReadingProgress] = useState(0);
-  
+
   const contentRef = useRef(null);
   const audioRef = useRef(null);
-  
+
+  // 将HTML内容分割为段落数组 (用于沉浸式翻译)
+  const contentParagraphs = reading
+    ? reading.content
+        .trim()
+        .split('<p class="mb-4">')
+        .filter(p => p.trim() !== '')
+        .map(p => p.replace('</p>', '').trim())
+    : [];
+
   useEffect(() => {
-    // 从localStorage加载阅读进度
-    const savedProgress = localStorage.getItem(`reading-progress-${id}`);
+    const currentId = window.location.pathname.split('/').pop() || "1";
+    const savedProgress = localStorage.getItem(`reading-progress-${currentId}`);
     if (savedProgress) {
       setReadingProgress(parseInt(savedProgress));
-      // 可以滚动到保存的位置
       setTimeout(() => {
         window.scrollTo({
           top: (document.body.scrollHeight * parseInt(savedProgress)) / 100,
@@ -69,21 +98,18 @@ export default function ReadingDetail({ params }) {
         });
       }, 500);
     }
-    
-    // 监听滚动事件来更新阅读进度
     const handleScroll = () => {
       const scrollTop = window.scrollY;
       const docHeight = document.body.scrollHeight;
       const winHeight = window.innerHeight;
       const scrollPercent = (scrollTop / (docHeight - winHeight)) * 100;
       setReadingProgress(Math.round(scrollPercent));
-      localStorage.setItem(`reading-progress-${id}`, Math.round(scrollPercent).toString());
+      localStorage.setItem(`reading-progress-${currentId}`, Math.round(scrollPercent).toString());
     };
-    
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, [id]);
-  
+
   if (!reading) {
     return (
       <div className="max-w-3xl mx-auto px-4 py-10 text-center">
@@ -97,21 +123,17 @@ export default function ReadingDetail({ params }) {
       </div>
     );
   }
-  
-  // 处理朗读功能
+
   const handleToggleRead = () => {
     if (!audioRef.current) {
-      // 使用Web Speech API
       const speech = new SpeechSynthesisUtterance();
       speech.text = reading.title + ". " + contentRef.current.textContent;
       speech.lang = 'zh-CN';
       speech.rate = 0.9;
-      
       speech.onstart = () => setIsPlaying(true);
       speech.onend = () => setIsPlaying(false);
       speech.onpause = () => setIsPlaying(false);
       speech.onresume = () => setIsPlaying(true);
-      
       audioRef.current = speech;
       window.speechSynthesis.speak(speech);
     } else {
@@ -128,14 +150,13 @@ export default function ReadingDetail({ params }) {
       }
     }
   };
-  
+
   const stopReading = () => {
     window.speechSynthesis.cancel();
     audioRef.current = null;
     setIsPlaying(false);
   };
-  
-  // 处理单词点击事件
+
   const handleWordClick = (e) => {
     if (e.target.tagName === 'SPAN' && e.target.title) {
       const rect = e.target.getBoundingClientRect();
@@ -147,8 +168,6 @@ export default function ReadingDetail({ params }) {
         word: e.target.innerText,
         definition: e.target.title
       });
-      
-      // 添加到高亮单词列表
       if (!highlightedWords.find(w => w.word === e.target.innerText)) {
         setHighlightedWords([...highlightedWords, {
           word: e.target.innerText,
@@ -157,34 +176,11 @@ export default function ReadingDetail({ params }) {
       }
     }
   };
-  
-  // 切换翻译显示
+
   const toggleTranslation = () => {
     setShowTranslation(!showTranslation);
   };
-  
-  // 英文翻译示例（实际项目中可从API获取）
-  const englishTranslation = {
-    title: "A Traveler's Morning",
-    content: `
-      <p class="mb-4">Every morning, when the sun has just risen, I like to walk around the hotel. The <span class="bg-blue-100 dark:bg-blue-900 px-1 rounded">sunrise</span> light is soft, and the city is quiet.</p>
-      
-      <p class="mb-4">Yesterday, I stopped at a small coffee shop. The owner <span class="bg-blue-100 dark:bg-blue-900 px-1 rounded">greeted</span> me in the local language: "Good morning!"</p>
-      
-      <p class="mb-4">I replied with the few phrases I had learned: "Good morning! I would like a coffee, please."</p>
-      
-      <p class="mb-4">The owner smiled and said: "Your pronunciation is good! Are you a <span class="bg-blue-100 dark:bg-blue-900 px-1 rounded">tourist</span>?"</p>
-      
-      <p class="mb-4">"Yes," I answered, "I'm from America, and this is my first time here."</p>
-      
-      <p class="mb-4">There were a few locals in the coffee shop. They were all very friendly, and an old gentleman told me about the history of the city.</p>
-      
-      <p class="mb-4">After I finished my coffee, I continued my morning <span class="bg-blue-100 dark:bg-blue-900 px-1 rounded">walk</span>. I saw the market beginning to come alive, with vendors preparing fresh fruits, vegetables, and bread.</p>
-      
-      <p class="mb-4">When traveling, mornings are the best time. You can see how the city wakes up and experience the daily life of locals. This is more meaningful than visiting <span class="bg-blue-100 dark:bg-blue-900 px-1 rounded">tourist attractions</span>.</p>
-    `
-  };
-  
+
   return (
     <div className="max-w-4xl mx-auto px-4 py-6">
       <div className="mb-6 flex justify-between items-center">
@@ -194,7 +190,6 @@ export default function ReadingDetail({ params }) {
         >
           <ArrowLeft className="h-4 w-4 mr-1" /> 返回阅读列表
         </Link>
-        
         <div className="flex items-center space-x-3">
           <button 
             onClick={() => setShowSettings(!showSettings)} 
@@ -203,7 +198,6 @@ export default function ReadingDetail({ params }) {
           >
             <Settings className="h-5 w-5 text-gray-600 dark:text-gray-300" />
           </button>
-          
           <button 
             onClick={toggleTranslation} 
             className={`p-2 rounded-md ${showTranslation ? 'bg-gray-200 dark:bg-gray-700' : 'hover:bg-gray-100 dark:hover:bg-gray-800'} transition-colors`}
@@ -211,7 +205,6 @@ export default function ReadingDetail({ params }) {
           >
             <Globe className="h-5 w-5 text-gray-600 dark:text-gray-300" />
           </button>
-          
           <button 
             onClick={isPlaying ? stopReading : handleToggleRead}
             className={`p-2 rounded-md ${isPlaying ? 'bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300' : 'hover:bg-gray-100 dark:hover:bg-gray-800'} transition-colors`}
@@ -221,16 +214,12 @@ export default function ReadingDetail({ params }) {
           </button>
         </div>
       </div>
-      
-      {/* 阅读进度条 */}
       <div className="w-full h-1 bg-gray-200 dark:bg-gray-700 rounded mb-4">
         <div 
           className="h-1 bg-blue-500 rounded transition-all duration-300 ease-in-out"
           style={{ width: `${readingProgress}%` }}
         ></div>
       </div>
-      
-      {/* 阅读设置面板 */}
       {showSettings && (
         <div className="bg-white dark:bg-gray-800 rounded-md shadow-lg p-4 mb-6 border border-gray-200 dark:border-gray-700">
           <div className="flex justify-between items-center mb-4">
@@ -239,7 +228,6 @@ export default function ReadingDetail({ params }) {
               <X className="h-5 w-5" />
             </button>
           </div>
-          
           <div className="mb-4">
             <label className="block text-sm text-gray-600 dark:text-gray-400 mb-2">字体大小</label>
             <div className="flex items-center space-x-2">
@@ -258,7 +246,6 @@ export default function ReadingDetail({ params }) {
               </button>
             </div>
           </div>
-          
           <div className="mb-4">
             <label className="block text-sm text-gray-600 dark:text-gray-400 mb-2">行间距</label>
             <div className="flex items-center space-x-2">
@@ -277,7 +264,6 @@ export default function ReadingDetail({ params }) {
               </button>
             </div>
           </div>
-          
           {highlightedWords.length > 0 && (
             <div className="mt-4">
               <h4 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">查询的单词</h4>
@@ -293,7 +279,6 @@ export default function ReadingDetail({ params }) {
           )}
         </div>
       )}
-      
       <header className="mb-8">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center space-x-2">
@@ -308,16 +293,15 @@ export default function ReadingDetail({ params }) {
             <Bookmark className="h-5 w-5" />
           </button>
         </div>
-        
         <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-4">
           {reading.title}
+          {showTranslation && (
+            <div className="text-xl text-gray-500 dark:text-gray-400 font-normal mt-2 border-l-4 border-blue-500 pl-3 italic">
+              {chineseTranslation.title}
+            </div>
+          )}
         </h1>
-        
-        <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
-          <div>作者：{reading.author} · 发布于 {reading.publishDate}</div>
-        </div>
       </header>
-      
       {reading.coverImage && (
         <div className="mb-8">
           <img 
@@ -327,36 +311,34 @@ export default function ReadingDetail({ params }) {
           />
         </div>
       )}
-      
-      {/* 阅读内容区域，增加字体大小和行高控制 */}
       <div className="relative">
         {showTranslation && (
           <div className="absolute right-0 top-0 bg-white dark:bg-gray-900 shadow-lg rounded-md px-2 py-1 text-sm">
             <div className="flex items-center space-x-2">
+              <span className="text-blue-600 dark:text-blue-400">中文翻译已开启</span>
             </div>
           </div>
         )}
-        
-        <div className="grid gap-6" style={{ gridTemplateColumns: showTranslation ? '1fr 1fr' : '1fr' }}>
-          <div
-            ref={contentRef}
-            className="prose dark:prose-invert prose-blue max-w-none mb-8 leading-relaxed"
-            style={{ fontSize: `${fontSize}px`, lineHeight: lineHeight }}
-            onClick={handleWordClick}
-            dangerouslySetInnerHTML={{ __html: reading.content }}
-          />
-          
-          {showTranslation && (
-            <div 
-              className="prose dark:prose-invert prose-blue max-w-none mb-8 leading-relaxed border-l border-gray-200 dark:border-gray-700 pl-4"
-              style={{ fontSize: `${fontSize}px`, lineHeight: lineHeight }}
-              dangerouslySetInnerHTML={{ __html: englishTranslation.content }}
-            />
-          )}
+        <div ref={contentRef} className="prose dark:prose-invert prose-blue max-w-none mb-8 leading-relaxed"
+          style={{ fontSize: `${fontSize}px`, lineHeight: lineHeight }}>
+          {contentParagraphs.map((paragraph, index) => (
+            <div key={index} className="mb-6">
+              <p 
+                className="mb-2"
+                onClick={handleWordClick}
+                dangerouslySetInnerHTML={{ __html: `<p class="mb-0">${paragraph}</p>` }}
+              />
+              {showTranslation && chineseTranslation.content[index] && (
+                <div 
+                  className="pl-3 border-l-2 border-blue-400 dark:border-blue-600 text-gray-600 dark:text-gray-400 italic transition-all duration-300 ease-in-out"
+                  style={{ fontSize: `${Math.max(fontSize - 1, 14)}px` }}
+                  dangerouslySetInnerHTML={{ __html: chineseTranslation.content[index] }}
+                />
+              )}
+            </div>
+          ))}
         </div>
       </div>
-      
-      {/* 单词弹出释义 */}
       {currentWord && (
         <div 
           className="fixed bg-white dark:bg-gray-800 rounded shadow-lg p-3 z-50 border border-gray-200 dark:border-gray-700 max-w-xs"
@@ -382,7 +364,6 @@ export default function ReadingDetail({ params }) {
           </div>
         </div>
       )}
-      
       <div className="mt-10 pt-6 border-t border-gray-200 dark:border-gray-800">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-4">

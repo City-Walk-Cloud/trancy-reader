@@ -1,6 +1,6 @@
 import Link from "next/link";
 import ThemeToggle from "../theme/theme-toggle";
-import { BookOpen, Bookmark, MessagesSquare, Book, UserCircle, Menu, BookText } from "lucide-react";
+import { BookOpen, Bookmark, MessagesSquare, UserCircle, Menu, BookText } from "lucide-react";
 
 export default function Navbar() {
   return (
@@ -12,10 +12,12 @@ export default function Navbar() {
             <h1 className="text-md font-bold">Trancy Language</h1>
           </Link>
           <nav className="hidden md:flex items-center space-x-4">
+            {/* 课程链接已被注释掉 
             <Link href="/lessons" className="flex items-center space-x-1 text-sm px-2 py-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
               <Book className="h-4 w-4" />
               <span>课程</span>
             </Link>
+            */}
             <Link href="/vocabulary" className="flex items-center space-x-1 text-sm px-2 py-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
               <Bookmark className="h-4 w-4" />
               <span>词汇</span>
@@ -24,6 +26,7 @@ export default function Navbar() {
               <MessagesSquare className="h-4 w-4" />
               <span>练习</span>
             </Link>
+           
             <Link href="/reading" className="flex items-center space-x-1 text-sm px-2 py-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
               <BookText className="h-4 w-4" />
               <span>阅读</span>

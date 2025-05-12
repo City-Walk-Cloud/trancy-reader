@@ -132,7 +132,7 @@ export default function ReadingPage() {
       {/* 卡片区域加 loading 遮罩 */}
       <div className="relative">
         {loading && (
-          <div className="absolute inset-0 z-10 flex items-center justify-center bg-black bg-opacity-30 rounded-lg">
+          <div className="absolute inset-0 z-10 flex items-center justify-center bg-opacity-30 rounded-lg">
             <div className="flex flex-col items-center">
               <svg className="animate-spin h-8 w-8 text-blue-500 mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>

@@ -13,7 +13,7 @@ export default function RootLayout({ children }) {
           disableTransitionOnChange
         >
           <Navbar />
-          <main className="container mx-auto px-4 py-4">
+          <main className="container mx-auto px-2 md:px-4 py-4"> {/* 减少container的内边距 */}
             {children}
           </main>
         </ThemeProvider>

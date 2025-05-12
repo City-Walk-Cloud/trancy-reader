@@ -5,11 +5,57 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-/* 确保404页面也应用主题 */
+/* 修改404页面暗黑模式规则，使用更具体的选择器避免影响其他页面 */
+html.dark .not-found-page, /* 假设404页面有一个.not-found-page类 */
+html.dark .error-page {    /* 或者error-page类 */
+  background-color: #191919;
+  color: #ffffffcf;
+}
+
+/* 如果没有特定类，可以使用路径选择器 */
+html.dark [data-page="not-found"] body,
+html.dark [data-page="not-found"] div,
+html.dark [data-page="not-found"] section,
+html.dark [data-page="not-found"] main {
+  background-color: #191919;
+  color: #ffffffcf;
+}
+
+/* 或者完全移除这些全局规则，因为RootLayout已经包含暗黑模式的样式 */
+/* 
 html.dark body,
 html.dark div,
 html.dark section,
 html.dark main {
   background-color: #191919;
   color: #ffffffcf;
+}
+*/
+
+/* 添加3D转轮效果所需的样式 */
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+
+/* 确保卡片保持在3D空间中 */
+.vocabulary-card-wrapper {
+  backface-visibility: hidden;
+}
+
+/* 防止卡片内容溢出其容器 */
+.vocabulary-card-wrapper > * {
+  max-height: 100%;
+  overflow: hidden;
+}
+
+/* 在小屏幕上调整转轮位置 */
+@media (max-width: 768px) {
+  .carousel-container {
+    transform: translateY(15px) scale(0.9);
+  }
+}
+
+/* 文字阴影，增强可读性 */
+.text-shadow {
+  text-shadow: 0px 2px 4px rgba(0, 0, 0, 0.8);
 }

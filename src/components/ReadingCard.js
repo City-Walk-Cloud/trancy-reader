@@ -14,7 +14,7 @@ export default function ReadingCard({ reading }) {
   } = reading;
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden transition-all hover:shadow-md">
+    <div className=" rounded-lg shadow-sm border border-gray-200  overflow-hidden transition-all hover:shadow-md">
       <div className="relative h-44 overflow-hidden">
         <img 
           src={coverImage} 

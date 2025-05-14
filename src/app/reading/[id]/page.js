@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { 
-  ArrowLeft, Bookmark, Volume2, ExternalLink, 
-  MessageCircle, ThumbsUp, Settings, 
-  VolumeX, ChevronLeft, ChevronRight, 
+import {
+  ArrowLeft, Bookmark, Volume2, ExternalLink,
+  MessageCircle, ThumbsUp, Settings,
+  VolumeX, ChevronLeft, ChevronRight,
   Globe, X, Languages
 } from "lucide-react";
 import Link from "next/link";
@@ -66,6 +66,15 @@ export default function ReadingDetail({ params }) {
   const contentRef = useRef(null);
   const audioRef = useRef(null);
 
+  // 划词翻译相关状态
+  const [selectedText, setSelectedText] = useState("");
+  const [showTranslatePopup, setShowTranslatePopup] = useState(false);
+  const [iconPosition, setIconPosition] = useState({ x: 0, y: 0 });
+  const selectionRangeRef = useRef(null);
+
+  // 划词区域ref
+  const markdownAreaRef = useRef(null);
+
   useEffect(() => {
     const currentId = window.location.pathname.split('/').pop() || "1";
     const savedProgress = localStorage.getItem(`reading-progress-${currentId}`);
@@ -89,6 +98,102 @@ export default function ReadingDetail({ params }) {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, [id]);
+
+  useEffect(() => {
+    // 只在markdown区域内监听
+    const handleTextSelection = (e) => {
+      const selection = window.getSelection();
+      if (!selection.rangeCount) {
+        setShowTranslatePopup(false);
+        return;
+      }
+      const range = selection.getRangeAt(0);
+      // 判断选区是否在markdown区域内
+      if (
+        !markdownAreaRef.current ||
+        (!markdownAreaRef.current.contains(range.startContainer) &&
+          !markdownAreaRef.current.contains(range.endContainer))
+      ) {
+        setShowTranslatePopup(false);
+        return;
+      }
+      const selectedTextValue = selection.toString().trim();
+      if (!selectedTextValue) {
+        setShowTranslatePopup(false);
+        return;
+      }
+      setSelectedText(selectedTextValue);
+      selectionRangeRef.current = range.cloneRange();
+
+      // 定位弹窗，优先靠近鼠标右键位置
+      let popupX = 0, popupY = 0;
+      if (e && e.type === "contextmenu" && typeof e.clientX === "number" && typeof e.clientY === "number") {
+        popupX = e.clientX + 8;
+        popupY = e.clientY - 8;
+      } else {
+        let rect = null;
+        const rects = range.getClientRects();
+        if (rects.length > 0) {
+          rect = rects[0];
+        } else {
+          rect = range.getBoundingClientRect();
+        }
+        popupX = rect.right + window.scrollX + 5;
+        popupY = rect.top + window.scrollY - 5;
+      }
+      setIconPosition({
+        x: popupX,
+        y: popupY
+      });
+    };
+
+    // 右键时判断是否有选区，有则显示弹窗
+    const handleContextMenu = (e) => {
+      if (!markdownAreaRef.current || !markdownAreaRef.current.contains(e.target)) return;
+      handleTextSelection(e);
+      const selection = window.getSelection();
+      if (selection && selection.toString().trim()) {
+        e.preventDefault();
+        setShowTranslatePopup(true);
+      } else {
+        setShowTranslatePopup(false);
+      }
+    };
+
+    const area = markdownAreaRef.current;
+    if (area) {
+      area.addEventListener('contextmenu', handleContextMenu);
+    }
+
+    // 监听 selectionchange，若选区为空则隐藏弹窗
+    const handleSelectionChange = () => {
+      const selection = window.getSelection();
+      if (!selection || !selection.rangeCount || !selection.toString().trim()) {
+        setShowTranslatePopup(false);
+      }
+    };
+    document.addEventListener('selectionchange', handleSelectionChange);
+
+    return () => {
+      if (area) {
+        area.removeEventListener('contextmenu', handleContextMenu);
+      }
+      document.removeEventListener('selectionchange', handleSelectionChange);
+    };
+  }, []);
+
+  // 图标出现时强制恢复选区
+  useEffect(() => {
+    if (showTranslatePopup && selectionRangeRef.current) {
+      setTimeout(() => {
+        try {
+          const selection = window.getSelection();
+          selection.removeAllRanges();
+          selection.addRange(selectionRangeRef.current.cloneRange());
+        } catch (e) { }
+      }, 0);
+    }
+  }, [showTranslatePopup]);
 
   const handleToggleRead = () => {
     if (!audioRef.current) {
@@ -150,28 +255,28 @@ export default function ReadingDetail({ params }) {
   return (
     <div className="max-w-4xl mx-auto px-4 py-6">
       <div className="mb-6 flex justify-between items-center">
-        <Link 
+        <Link
           href="/reading"
           className="inline-flex items-center text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
         >
           <ArrowLeft className="h-4 w-4 mr-1" /> 返回阅读列表
         </Link>
         <div className="flex items-center space-x-3">
-          <button 
-            onClick={() => setShowSettings(!showSettings)} 
+          <button
+            onClick={() => setShowSettings(!showSettings)}
             className={`p-2 rounded-md ${showSettings ? 'bg-gray-200 dark:bg-gray-700' : 'hover:bg-gray-100 dark:hover:bg-gray-800'} transition-colors`}
             aria-label="阅读设置"
           >
             <Settings className="h-5 w-5 text-gray-600 dark:text-gray-300" />
           </button>
-          <button 
-            onClick={toggleTranslation} 
+          <button
+            onClick={toggleTranslation}
             className={`p-2 rounded-md ${showTranslation ? 'bg-gray-200 dark:bg-gray-700' : 'hover:bg-gray-100 dark:hover:bg-gray-800'} transition-colors`}
             aria-label="显示翻译"
           >
             <Globe className="h-5 w-5 text-gray-600 dark:text-gray-300" />
           </button>
-          <button 
+          <button
             onClick={isPlaying ? stopReading : handleToggleRead}
             className={`p-2 rounded-md ${isPlaying ? 'bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300' : 'hover:bg-gray-100 dark:hover:bg-gray-800'} transition-colors`}
             aria-label={isPlaying ? "停止朗读" : "朗读文章"}
@@ -181,7 +286,7 @@ export default function ReadingDetail({ params }) {
         </div>
       </div>
       <div className="w-full h-1 bg-gray-200 dark:bg-gray-700 rounded mb-4">
-        <div 
+        <div
           className="h-1 bg-blue-500 rounded transition-all duration-300 ease-in-out"
           style={{ width: `${readingProgress}%` }}
         ></div>
@@ -197,14 +302,14 @@ export default function ReadingDetail({ params }) {
           <div className="mb-4">
             <label className="block text-sm text-gray-600 dark:text-gray-400 mb-2">字体大小</label>
             <div className="flex items-center space-x-2">
-              <button 
+              <button
                 onClick={() => setFontSize(prev => Math.max(14, prev - 2))}
                 className="p-1 rounded bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
               >
                 <ChevronLeft className="h-4 w-4" />
               </button>
               <span className="text-sm w-8 text-center">{fontSize}px</span>
-              <button 
+              <button
                 onClick={() => setFontSize(prev => Math.min(28, prev + 2))}
                 className="p-1 rounded bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
               >
@@ -215,14 +320,14 @@ export default function ReadingDetail({ params }) {
           <div className="mb-4">
             <label className="block text-sm text-gray-600 dark:text-gray-400 mb-2">行间距</label>
             <div className="flex items-center space-x-2">
-              <button 
+              <button
                 onClick={() => setLineHeight(prev => Math.max(1.2, prev - 0.2))}
                 className="p-1 rounded bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
               >
                 <ChevronLeft className="h-4 w-4" />
               </button>
               <span className="text-sm w-8 text-center">{lineHeight.toFixed(1)}</span>
-              <button 
+              <button
                 onClick={() => setLineHeight(prev => Math.min(2.4, prev + 0.2))}
                 className="p-1 rounded bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
               >
@@ -236,7 +341,7 @@ export default function ReadingDetail({ params }) {
               <div className="max-h-32 overflow-y-auto">
                 {highlightedWords.map((item, index) => (
                   <div key={index} className="text-sm py-1 border-b border-gray-100 dark:border-gray-700 last:border-0">
-                    <span className="font-medium">{item.word}</span>: 
+                    <span className="font-medium">{item.word}</span>:
                     <span className="text-gray-600 dark:text-gray-400 ml-1">{item.definition.split(':')[1]}</span>
                   </div>
                 ))}
@@ -270,7 +375,7 @@ export default function ReadingDetail({ params }) {
       </header>
       {reading.coverImage && (
         <div className="mb-8">
-          <img 
+          <img
             src={reading.coverImage}
             alt={reading.title}
             className="w-full h-64 object-cover rounded-lg"
@@ -278,13 +383,16 @@ export default function ReadingDetail({ params }) {
         </div>
       )}
       <div className="relative">
-        <div ref={contentRef} className="prose dark:prose-invert prose-blue max-w-none mb-8 leading-relaxed"
-          style={{ fontSize: `${fontSize}px`, lineHeight: lineHeight }}>
+        <div
+          ref={markdownAreaRef}
+          className="prose dark:prose-invert prose-blue max-w-none mb-8 leading-relaxed"
+          style={{ fontSize: `${fontSize}px`, lineHeight: lineHeight }}
+        >
           {reading.content.map((paragraph, index) => (
             <div key={index} className="mb-6">
               <ReactMarkdown>{paragraph}</ReactMarkdown>
               {showTranslation && chineseTranslation.content[index] && (
-                <div 
+                <div
                   className="pl-3 border-l-2 border-blue-400 dark:border-blue-600 text-gray-600 dark:text-gray-400 italic transition-all duration-300 ease-in-out"
                   style={{ fontSize: `${Math.max(fontSize - 1, 14)}px` }}
                 >
@@ -294,9 +402,40 @@ export default function ReadingDetail({ params }) {
             </div>
           ))}
         </div>
+        {/* 右键直接弹出翻译弹窗 */}
+        {showTranslatePopup && (
+          <div
+            className="fixed bg-white dark:bg-gray-800 rounded shadow-lg p-4 z-50 border border-gray-200 dark:border-gray-700 max-w-xs"
+            style={{
+              left: Math.min(iconPosition.x, window.innerWidth - 320),
+              top: iconPosition.y + 8
+            }}
+          >
+            <div className="flex justify-between items-center mb-2">
+              <span className="font-bold text-blue-600 dark:text-blue-300">翻译</span>
+              <button
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                onClick={() => setShowTranslatePopup(false)}
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="mb-2 text-gray-800 dark:text-gray-100 break-words">
+              <span className="font-medium">原文：</span>
+              <span>{selectedText}</span>
+            </div>
+            <div className="mb-2 text-gray-700 dark:text-gray-300 break-words">
+              <span className="font-medium">翻译：</span>
+              <span>
+                {/* 这里可接入实际翻译API，暂用模拟内容 */}
+                {selectedText ? `【${selectedText}】的翻译结果` : ""}
+              </span>
+            </div>
+          </div>
+        )}
       </div>
       {currentWord && (
-        <div 
+        <div
           className="fixed bg-white dark:bg-gray-800 rounded shadow-lg p-3 z-50 border border-gray-200 dark:border-gray-700 max-w-xs"
           style={{
             left: Math.min(wordPosition.x, window.innerWidth - 280),
@@ -305,7 +444,7 @@ export default function ReadingDetail({ params }) {
         >
           <div className="flex justify-between items-start">
             <h3 className="font-bold">{currentWord.word}</h3>
-            <button 
+            <button
               onClick={() => setCurrentWord(null)}
               className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
             >

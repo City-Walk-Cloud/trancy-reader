@@ -5,9 +5,10 @@ import {
   ArrowLeft, Bookmark, Volume2, ExternalLink, 
   MessageCircle, ThumbsUp, Settings, 
   VolumeX, ChevronLeft, ChevronRight, 
-  Globe, X
+  Globe, X, Languages
 } from "lucide-react";
 import Link from "next/link";
+import ReactMarkdown from "react-markdown";
 
 // 英文原文和中文翻译示例（实际项目中应从API获取）
 const readingData = {
@@ -18,23 +19,14 @@ const readingData = {
     author: "Sarah Chen",
     publishDate: "2023-10-15",
     coverImage: "https://images.unsplash.com/photo-1501785888041-af3ef285b470?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80",
-    content: `
-      <p class="mb-4">Every morning, when the sun has just risen, I like to walk around the hotel. The <span class="bg-yellow-100 dark:bg-yellow-900 px-1 rounded cursor-pointer" title="sunrise: 日出，黎明">sunrise</span> light is soft, and the city is quiet.</p>
-      
-      <p class="mb-4">Yesterday, I stopped at a small coffee shop. The owner <span class="bg-yellow-100 dark:bg-yellow-900 px-1 rounded cursor-pointer" title="greet: 问候，打招呼">greeted</span> me in the local language: "Good morning!"</p>
-      
-      <p class="mb-4">I replied with the few phrases I had learned: "Good morning! I would like a coffee, please."</p>
-      
-      <p class="mb-4">The owner smiled and said: "Your pronunciation is good! Are you a <span class="bg-yellow-100 dark:bg-yellow-900 px-1 rounded cursor-pointer" title="tourist: 游客，旅行者">tourist</span>?"</p>
-      
-      <p class="mb-4">"Yes," I answered, "I'm from America, and this is my first time here."</p>
-      
-      <p class="mb-4">There were a few locals in the coffee shop. They were all very friendly, and an old gentleman told me about the history of the city.</p>
-      
-      <p class="mb-4">After I finished my coffee, I continued my morning <span class="bg-yellow-100 dark:bg-yellow-900 px-1 rounded cursor-pointer" title="walk: 步行，散步">walk</span>. I saw the market beginning to come alive, with vendors preparing fresh fruits, vegetables, and bread.</p>
-      
-      <p class="mb-4">When traveling, mornings are the best time. You can see how the city wakes up and experience the daily life of locals. This is more meaningful than visiting <span class="bg-yellow-100 dark:bg-yellow-900 px-1 rounded cursor-pointer" title="tourist attractions: 旅游景点">tourist attractions</span>.</p>
-    `
+    content: [
+      // 每段英文和对应的中文翻译一一对应
+      `I woke up early to the sound of birds outside my window. The city was quiet, and the air was fresh. After a quick breakfast, I decided to explore the old streets.`,
+      `Walking along the river, I saw people riding bicycles and shop owners opening their doors. A friendly woman smiled and said, "Good morning!" in Japanese.`,
+      `I stopped at a small bakery and bought a piece of sweet bread. The baker asked where I was from. "I'm from China," I replied. He nodded and gave me a map of the city.`,
+      `Later, I visited a peaceful temple. The garden was full of green trees and colorful flowers. I sat on a bench and listened to the wind in the leaves.`,
+      `Traveling alone can feel lonely sometimes, but mornings like this make me feel happy and free.`
+    ]
   }
 };
 
@@ -42,14 +34,11 @@ const readingData = {
 const chineseTranslation = {
   title: "旅行者的早晨",
   content: [
-    "每天早晨，当太阳刚刚升起时，我喜欢在酒店附近散步。<span class=\"bg-blue-100 dark:bg-blue-900 px-1 rounded\">日出</span>的光线很柔和，城市也很安静。",
-    "昨天，我在一家小咖啡店停下来。店主用当地语言和我<span class=\"bg-blue-100 dark:bg-blue-900 px-1 rounded\">打招呼</span>：\"早上好！\"",
-    "我用刚学会的几句话回答：\"早上好！我想要一杯咖啡，谢谢。\"",
-    "店主微笑着说：\"你的发音很好！你是<span class=\"bg-blue-100 dark:bg-blue-900 px-1 rounded\">游客</span>吗？\"",
-    "\"是的，\"我回答，\"我来自美国，这是我第一次来这里。\"",
-    "咖啡店里有几位当地人。他们都很友好，一位老先生告诉我关于这座城市的历史。",
-    "我喝完咖啡后，继续我的晨间<span class=\"bg-blue-100 dark:bg-blue-900 px-1 rounded\">散步</span>。我看到市场开始热闹起来，商贩们准备新鲜的水果、蔬菜和面包。",
-    "旅行时，早晨是最好的时间。你可以看到城市醒来的样子，感受当地人的日常生活。这比参观<span class=\"bg-blue-100 dark:bg-blue-900 px-1 rounded\">旅游景点</span>更有意义。"
+    `我被窗外的鸟叫声唤醒。城市很安静，空气很清新。吃过简单的早餐后，我决定去老街走走。`,
+    `沿着河边散步时，我看到有人骑自行车，店主们正在开门。一位友善的女士用日语对我说：“早上好！”`,
+    `我在一家小面包店停下，买了一块甜面包。面包师问我来自哪里。“我来自中国。”我回答。他点点头，递给我一张城市地图。`,
+    `后来，我参观了一座安静的寺庙。花园里满是绿色的树和五彩的花。我坐在长椅上，听着风吹过树叶的声音。`,
+    `一个人旅行有时会觉得孤单，但这样的早晨让我感到快乐和自由。`
   ]
 };
 
@@ -77,15 +66,6 @@ export default function ReadingDetail({ params }) {
   const contentRef = useRef(null);
   const audioRef = useRef(null);
 
-  // 将HTML内容分割为段落数组 (用于沉浸式翻译)
-  const contentParagraphs = reading
-    ? reading.content
-        .trim()
-        .split('<p class="mb-4">')
-        .filter(p => p.trim() !== '')
-        .map(p => p.replace('</p>', '').trim())
-    : [];
-
   useEffect(() => {
     const currentId = window.location.pathname.split('/').pop() || "1";
     const savedProgress = localStorage.getItem(`reading-progress-${currentId}`);
@@ -109,20 +89,6 @@ export default function ReadingDetail({ params }) {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, [id]);
-
-  if (!reading) {
-    return (
-      <div className="max-w-3xl mx-auto px-4 py-10 text-center">
-        <h1 className="text-2xl font-bold mb-4">阅读材料未找到</h1>
-        <Link 
-          href="/reading"
-          className="inline-flex items-center text-blue-600 dark:text-blue-400"
-        >
-          <ArrowLeft className="h-4 w-4 mr-1" /> 返回阅读列表
-        </Link>
-      </div>
-    );
-  }
 
   const handleToggleRead = () => {
     if (!audioRef.current) {
@@ -312,28 +278,18 @@ export default function ReadingDetail({ params }) {
         </div>
       )}
       <div className="relative">
-        {showTranslation && (
-          <div className="absolute right-0 top-0 bg-white dark:bg-gray-900 shadow-lg rounded-md px-2 py-1 text-sm">
-            <div className="flex items-center space-x-2">
-              <span className="text-blue-600 dark:text-blue-400">中文翻译已开启</span>
-            </div>
-          </div>
-        )}
         <div ref={contentRef} className="prose dark:prose-invert prose-blue max-w-none mb-8 leading-relaxed"
           style={{ fontSize: `${fontSize}px`, lineHeight: lineHeight }}>
-          {contentParagraphs.map((paragraph, index) => (
+          {reading.content.map((paragraph, index) => (
             <div key={index} className="mb-6">
-              <p 
-                className="mb-2"
-                onClick={handleWordClick}
-                dangerouslySetInnerHTML={{ __html: `<p class="mb-0">${paragraph}</p>` }}
-              />
+              <ReactMarkdown>{paragraph}</ReactMarkdown>
               {showTranslation && chineseTranslation.content[index] && (
                 <div 
                   className="pl-3 border-l-2 border-blue-400 dark:border-blue-600 text-gray-600 dark:text-gray-400 italic transition-all duration-300 ease-in-out"
                   style={{ fontSize: `${Math.max(fontSize - 1, 14)}px` }}
-                  dangerouslySetInnerHTML={{ __html: chineseTranslation.content[index] }}
-                />
+                >
+                  <ReactMarkdown>{chineseTranslation.content[index]}</ReactMarkdown>
+                </div>
               )}
             </div>
           ))}
@@ -364,27 +320,6 @@ export default function ReadingDetail({ params }) {
           </div>
         </div>
       )}
-      <div className="mt-10 pt-6 border-t border-gray-200 dark:border-gray-800">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center space-x-4">
-            <button className="flex items-center space-x-1 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400">
-              <ThumbsUp className="h-5 w-5" />
-              <span>有帮助</span>
-            </button>
-            <button className="flex items-center space-x-1 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400">
-              <MessageCircle className="h-5 w-5" />
-              <span>添加笔记</span>
-            </button>
-          </div>
-          <Link 
-            href={`/practice?reading=${id}`}
-            className="flex items-center space-x-1 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
-          >
-            <ExternalLink className="h-4 w-4" />
-            <span>练习理解</span>
-          </Link>
-        </div>
-      </div>
     </div>
   );
 }
